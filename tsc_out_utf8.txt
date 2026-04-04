@@ -1,0 +1,27 @@
+﻿.next/dev/types/app/api/hianime/watch/route.ts(2,24): error TS2307: Cannot find module '../../../../../../../app/api/hianime/watch/route.js' or its corresponding type declarations.
+.next/dev/types/app/api/hianime/watch/route.ts(7,29): error TS2307: Cannot find module '../../../../../../../app/api/hianime/watch/route.js' or its corresponding type declarations.
+.next/types/validator.ts(134,39): error TS2307: Cannot find module '../../app/api/hianime/watch/route.js' or its corresponding type declarations.
+app/browse/page.tsx(54,7): error TS2322: Type 'IAnimeResult[]' is not assignable to type 'AnimeKaiListItem[]'.
+  Type 'IAnimeResult' is not assignable to type 'AnimeKaiListItem'.
+    Types of property 'title' are incompatible.
+      Type 'string | ITitle' is not assignable to type 'string'.
+        Type 'ITitle' is not assignable to type 'string'.
+app/browse/page.tsx(56,7): error TS2322: Type 'IAnimeResult[]' is not assignable to type 'AnimeKaiListItem[]'.
+  Type 'IAnimeResult' is not assignable to type 'AnimeKaiListItem'.
+    Types of property 'title' are incompatible.
+      Type 'string | ITitle' is not assignable to type 'string'.
+        Type 'ITitle' is not assignable to type 'string'.
+app/page.tsx(62,19): error TS2322: Type 'IAnimeResult' is not assignable to type 'AnimeKaiListItem'.
+  Types of property 'title' are incompatible.
+    Type 'string | ITitle' is not assignable to type 'string'.
+      Type 'ITitle' is not assignable to type 'string'.
+app/page.tsx(64,27): error TS2322: Type 'IAnimeResult[]' is not assignable to type 'AnimeKaiListItem[]'.
+  Type 'IAnimeResult' is not assignable to type 'AnimeKaiListItem'.
+    Types of property 'title' are incompatible.
+      Type 'string | ITitle' is not assignable to type 'string'.
+        Type 'ITitle' is not assignable to type 'string'.
+app/page.tsx(68,29): error TS2322: Type 'IAnimeResult[]' is not assignable to type 'AnimeKaiListItem[]'.
+  Type 'IAnimeResult' is not assignable to type 'AnimeKaiListItem'.
+    Types of property 'title' are incompatible.
+      Type 'string | ITitle' is not assignable to type 'string'.
+        Type 'ITitle' is not assignable to type 'string'.
