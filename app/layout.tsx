@@ -29,6 +29,13 @@ export const metadata: Metadata = {
   description: "Stream anime and read manga — dark, premium experience powered by live catalog data.",
 };
 
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  themeColor: "#000000",
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{

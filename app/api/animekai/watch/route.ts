@@ -14,12 +14,16 @@ export async function GET(req: NextRequest) {
     const data = await animeKaiWatch(episodeId, server, category);
     return NextResponse.json(data);
   } catch (e) {
+    console.error("AnimeKai Watch Stream Error:", e);
     if (e instanceof AnimeKaiError) {
       return NextResponse.json(
         { error: e.message },
         { status: e.status >= 400 && e.status < 600 ? e.status : 502 },
       );
     }
-    return NextResponse.json({ error: "Stream lookup failed" }, { status: 502 });
+    return NextResponse.json(
+      { error: "Stream lookup failed", details: e instanceof Error ? e.message : String(e) },
+      { status: 502 }
+    );
   }
 }
