@@ -52,11 +52,11 @@ export default function RootLayout({
       className={`${outfit.variable} ${bebas.variable} ${notoJp.variable} h-full antialiased`}
     >
       <body
-        className="min-h-full flex flex-col bg-background text-foreground"
+        className="min-h-full flex flex-col bg-background text-foreground overflow-x-hidden"
         suppressHydrationWarning
       >
         <Navbar />
-        <div className="flex flex-1 flex-col pb-20 md:pb-0">{children}</div>
+        <div className="flex flex-1 flex-col overflow-x-hidden pb-20 md:pb-0">{children}</div>
         <BottomNav />
       </body>
     </html>
