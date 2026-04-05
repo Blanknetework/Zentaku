@@ -29,10 +29,13 @@ export const metadata: Metadata = {
   description: "Stream anime and read manga — dark, premium experience powered by live catalog data.",
 };
 
-export const viewport = {
+import type { Viewport } from "next";
+
+export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
+  userScalable: false,
   themeColor: "#000000",
 };
 

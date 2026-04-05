@@ -32,6 +32,9 @@ export function HlsVideoPlayer({
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const [activeServer, setActiveServer] = useState(server);
+  const [activeCategory, setActiveCategory] = useState(category);
+
   useEffect(() => {
     const video = videoRef.current;
     if (!video || !episodeId) return;
@@ -48,8 +51,8 @@ export function HlsVideoPlayer({
       try {
         const qs = new URLSearchParams({
           episodeId,
-          server,
-          category,
+          server: activeServer,
+          category: activeCategory,
         });
         const res = await fetch(`/api/animekai/watch?${qs}`);
         const body = (await res.json()) as WatchJson & { error?: string };
@@ -111,27 +114,69 @@ export function HlsVideoPlayer({
       hlsRef.current?.destroy();
       hlsRef.current = null;
     };
-  }, [episodeId, server, category]);
+  }, [episodeId, activeServer, activeCategory]);
 
   return (
-    <div className="relative aspect-video w-full overflow-hidden rounded-xl bg-black">
-      {loading && (
-        <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/50 text-sm text-white">
-          Loading stream…
+    <div className="space-y-3">
+      <div className="relative aspect-video w-full overflow-hidden rounded-xl bg-black">
+        {loading && (
+          <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/50 text-sm text-white">
+            Loading stream…
+          </div>
+        )}
+        {error && (
+          <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/80 px-4 text-center text-sm text-red-200">
+            {error}
+          </div>
+        )}
+        <video
+          ref={videoRef}
+          className="h-full w-full"
+          controls
+          playsInline
+          poster={poster}
+        />
+      </div>
+
+      <div className="flex flex-col gap-3 rounded-xl border border-white/5 bg-surface/50 p-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-semibold uppercase tracking-wider text-muted">Server:</span>
+          <div className="flex flex-wrap gap-2">
+            {["vidstreaming", "megacloud", "streamsb"].map((s, idx) => (
+              <button
+                key={s}
+                onClick={() => setActiveServer(s)}
+                className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${
+                  activeServer === s
+                    ? "bg-accent text-white shadow-[0_0_10px_rgba(255,26,26,0.3)]"
+                    : "bg-white/5 text-white/50 hover:bg-white/10 hover:text-white"
+                }`}
+              >
+                Stream {idx + 1}
+              </button>
+            ))}
+          </div>
         </div>
-      )}
-      {error && (
-        <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/80 px-4 text-center text-sm text-red-200">
-          {error}
+
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-semibold uppercase tracking-wider text-muted">Audio:</span>
+          <div className="flex flex-wrap gap-2">
+            {["sub", "dub", "raw"].map((c) => (
+              <button
+                key={c}
+                onClick={() => setActiveCategory(c)}
+                className={`rounded-lg px-4 py-1.5 text-xs font-bold uppercase transition-all ${
+                  activeCategory === c
+                    ? "bg-accent text-white shadow-[0_0_10px_rgba(255,26,26,0.3)]"
+                    : "bg-white/5 text-white/50 hover:bg-white/10 hover:text-white"
+                }`}
+              >
+                {c}
+              </button>
+            ))}
+          </div>
         </div>
-      )}
-      <video
-        ref={videoRef}
-        className="h-full w-full"
-        controls
-        playsInline
-        poster={poster}
-      />
+      </div>
     </div>
   );
 }

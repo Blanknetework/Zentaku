@@ -109,7 +109,7 @@ export async function animeKaiWatch(
   server = "vidstreaming",
   category = "sub",
 ): Promise<AnimeKaiWatchResult> {
-  const src = await animekai.fetchEpisodeSources(episodeId);
+  const src = await animekai.fetchEpisodeSources(episodeId, server as any, category as any);
   return {
     headers: src.headers,
     sources: (src.sources || []).map((s: any) => ({

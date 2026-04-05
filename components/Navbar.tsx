@@ -96,7 +96,7 @@ function NavbarInner() {
 
         <button
           type="button"
-          className="rounded-full bg-white/5 p-2.5 text-white/70 transition-colors hover:bg-white/10 hover:text-white md:hidden"
+          className="ml-auto rounded-full bg-white/5 p-2.5 text-white/70 transition-colors hover:bg-white/10 hover:text-white md:hidden"
           aria-label="Menu"
           onClick={() => setOpen((v) => !v)}
         >
@@ -167,7 +167,7 @@ export function Navbar() {
   );
 }
 
-/** Same chrome as navbar while searchParams stream (avoids layout shift). */
+
 function NavbarFallbackShell() {
   return (
     <header className="sticky top-0 z-50 border-b border-white/[0.06]">
