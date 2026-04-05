@@ -1,0 +1,7 @@
+Fetching anime info for nippon-sangoku...
+Got info, fetching sources for ep 1...
+epId: nippon-sangoku-rkkm9$ep=1$token=e4Wz-Oz4uw26iWhfipTb
+Error: Error: Server megaup not found
+    at AnimeKai.AnimeKai.fetchEpisodeSources (C:\Users\My PC\OneDrive\Documents\Zentaku\node_modules\@consumet\extensions\src\providers\anime\animekai.ts:481:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async main (C:\Users\My PC\OneDrive\Documents\Zentaku\test_animekai.ts:12:23)
