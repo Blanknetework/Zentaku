@@ -1,20 +1,21 @@
 import { ANIME } from "@consumet/extensions";
 
 async function main() {
-  const animekai = new ANIME.AnimeKai();
-  console.log("Fetching anime info for nippon-sangoku...");
+  const gogo = new ANIME.Gogoanime();
   try {
-    const info = await animekai.fetchAnimeInfo("nippon-sangoku-rkkm9");
-    console.log("Got info, fetching sources for ep 1...");
-    if (info.episodes && info.episodes.length > 0) {
-      const epId = info.episodes[0].id;
-      console.log("epId:", epId);
-      const sources = await animekai.fetchEpisodeSources(epId);
-      console.log("Sources:", sources);
-    } else {
-      console.log("No episodes found.");
+    const results = await gogo.search("classroom of the elite");
+    console.log("Search:", results.results[0]);
+    if (results.results.length > 0) {
+      const info = await gogo.fetchAnimeInfo(results.results[0].id);
+      console.log("Info ID:", info.id);
+      if (info.episodes && info.episodes.length > 0) {
+        const epId = info.episodes[0].id;
+        console.log("Ep ID:", epId);
+        const sources = await gogo.fetchEpisodeSources(epId);
+        console.log("Sources:", sources.sources.map(s => s.quality));
+      }
     }
-  } catch (e) {
+  } catch(e) {
     console.error("Error:", e);
   }
 }

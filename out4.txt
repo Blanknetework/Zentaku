@@ -1,12 +1,12 @@
 C:\Users\My PC\OneDrive\Documents\Zentaku\test_animekai.ts:4
-  const hianime = new HiAnime.Scraper();
-                              ^
+  const gogo = new ANIME.Gogoanime();
+               ^
 
 
-TypeError: Cannot read properties of undefined (reading 'Scraper')
-    at main (C:\Users\My PC\OneDrive\Documents\Zentaku\test_animekai.ts:4:31)
-    at <anonymous> (C:\Users\My PC\OneDrive\Documents\Zentaku\test_animekai.ts:12:1)
-    at Object.<anonymous> (C:\Users\My PC\OneDrive\Documents\Zentaku\test_animekai.ts:12:6)
+TypeError: import_extensions.ANIME.Gogoanime is not a constructor
+    at main (C:\Users\My PC\OneDrive\Documents\Zentaku\test_animekai.ts:4:16)
+    at <anonymous> (C:\Users\My PC\OneDrive\Documents\Zentaku\test_animekai.ts:22:1)
+    at Object.<anonymous> (C:\Users\My PC\OneDrive\Documents\Zentaku\test_animekai.ts:22:6)
     at Module._compile (node:internal/modules/cjs/loader:1546:14)
     at Object.transformer (C:\Users\My PC\AppData\Local\npm-cache\_npx\fd45a72a545557e9\node_modules\tsx\dist\register-D46fvsV_.cjs:3:1104)
     at Module.load (node:internal/modules/cjs/loader:1318:32)
