@@ -3,7 +3,7 @@ import { animeKaiWatch, AnimeKaiError } from "@/lib/animekai";
 
 export async function GET(req: NextRequest) {
   const episodeId = req.nextUrl.searchParams.get("episodeId");
-  const server = req.nextUrl.searchParams.get("server") ?? "vidstreaming";
+  const server = req.nextUrl.searchParams.get("server") ?? "megaup";
   const category = req.nextUrl.searchParams.get("category") ?? "sub";
 
   if (!episodeId?.trim()) {

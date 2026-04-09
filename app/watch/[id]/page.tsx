@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ApiError } from "@/components/ApiError";
 import { HlsVideoPlayer } from "@/components/HlsVideoPlayer";
+import { OfficialStreams } from "@/components/OfficialStreams";
 import { EpisodeSidebar } from "@/components/EpisodeSidebar";
 import { CommentsSection } from "@/components/CommentsSection";
 import { animeIdFromParam, animeDetailHref } from "@/lib/anime-path";
@@ -86,6 +87,7 @@ export default async function WatchPage({ params, searchParams }: Props) {
           <div className="space-y-2">
             <p className="text-xs font-semibold uppercase tracking-wide text-muted">{episodeLabel}</p>
             <HlsVideoPlayer episodeId={currentEpisode.id} poster={poster || undefined} />
+            {anime.alID && <OfficialStreams alId={anime.alID} />}
           </div>
           <div>
             <h1 className="text-2xl font-bold text-white md:text-3xl">{title}</h1>

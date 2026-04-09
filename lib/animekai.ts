@@ -35,6 +35,8 @@ export type AnimeKaiEpisode = {
 
 export type AnimeKaiInfo = {
   id: string;
+  alID?: number;
+  malID?: number;
   title: string;
   url: string;
   image: string;
@@ -85,6 +87,8 @@ export async function animeKaiInfo(id: string): Promise<AnimeKaiInfo> {
   const info = await animekai.fetchAnimeInfo(id);
   return {
     id: info.id,
+    alID: (info as any).alID,
+    malID: (info as any).malID,
     title: info.title.toString(),
     url: info.url || "",
     image: info.image || "",
