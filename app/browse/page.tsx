@@ -23,7 +23,7 @@ type SearchParams = Promise<{
 }>;
 
 type BrowseData = {
-  type: "anime" | "manga";
+  type: "anime" | "manga" | "both";
   q: string;
   title: string;
   isPopularView: boolean;
@@ -39,14 +39,19 @@ function apiError(err: unknown) {
 }
 
 async function loadBrowseData(sp: Awaited<SearchParams>): Promise<BrowseData> {
-  const type = sp.type === "manga" ? "manga" : "anime";
-  const q = (sp.q ?? "").trim();
   const popular = sp.sort === "popular";
+  let type: "anime" | "manga" | "both" = "anime";
+  
+  if (sp.type === "manga") type = "manga";
+  else if (sp.type === "anime") type = "anime";
+  else if (popular) type = "both";
+
+  const q = (sp.q ?? "").trim();
 
   let animeList: AnimeKaiListItem[] | null = null;
   let mangaList: JikanMangaListEntry[] | null = null;
 
-  if (type === "anime") {
+  if (type === "anime" || type === "both") {
     if (q) {
       const page = await animeKaiSearch(q);
       animeList = page.results;
@@ -55,7 +60,9 @@ async function loadBrowseData(sp: Awaited<SearchParams>): Promise<BrowseData> {
     } else {
       animeList = await animeKaiTopAiring(1, 24);
     }
-  } else {
+  }
+  
+  if (type === "manga" || type === "both") {
     if (q) mangaList = await searchManga(q, 24);
     else mangaList = await getTopManga(24);
   }
@@ -64,7 +71,7 @@ async function loadBrowseData(sp: Awaited<SearchParams>): Promise<BrowseData> {
     q !== ""
       ? `Results for “${q}”`
       : popular
-        ? "Popular now"
+        ? "Trending Now"
         : type === "anime"
           ? "Trending anime"
           : "Top manga";
@@ -95,47 +102,35 @@ async function BrowseResults({ sp }: { sp: Awaited<SearchParams> }) {
         <div className="space-y-1">
           <h1 className="font-display text-4xl font-extrabold tracking-tight text-white md:text-5xl drop-shadow-md">{title}</h1>
           <p className="text-sm font-medium text-white/50">
-            {type === "anime"
-              ? "Explore the ultimate anime collection"
-              : "Discover the latest chapters and top-rated manga"}
+            {type === "both" 
+              ? "Discover the hottest anime and manga"
+              : type === "anime"
+                ? "Explore the ultimate anime collection"
+                : "Discover the latest chapters and top-rated manga"}
           </p>
         </div>
-        <div className="flex flex-wrap gap-3 bg-white/5 p-1.5 rounded-2xl border border-white/10 backdrop-blur-md">
-          <Link
-            href={`/browse?type=anime${q ? `&q=${encodeURIComponent(q)}` : ""}`}
-            className={`rounded-xl px-5 py-2.5 text-sm font-bold uppercase tracking-wider transition-all duration-300 ${
-              type === "anime" && !isPopularView
-                ? "bg-accent text-white shadow-[0_0_15px_rgba(255,26,26,0.4)] hover:shadow-[0_0_20px_rgba(255,26,26,0.6)]"
-                : "text-white/60 hover:text-white hover:bg-white/5"
-            }`}
-          >
-            Anime Tracker
-          </Link>
-          <Link
-            href={`/browse?type=manga${q ? `&q=${encodeURIComponent(q)}` : ""}`}
-            className={`rounded-xl px-5 py-2.5 text-sm font-bold uppercase tracking-wider transition-all duration-300 ${
-              type === "manga"
-                ? "bg-accent text-white shadow-[0_0_15px_rgba(255,26,26,0.4)] hover:shadow-[0_0_20px_rgba(255,26,26,0.6)]"
-                : "text-white/60 hover:text-white hover:bg-white/5"
-            }`}
-          >
-            Manga Vault
-          </Link>
-          <Link
-            href={`/browse?type=anime&sort=popular${q ? `&q=${encodeURIComponent(q)}` : ""}`}
-            className={`rounded-xl px-5 py-2.5 text-sm font-bold uppercase tracking-wider transition-all duration-300 ${
-              isPopularView && type === "anime"
-                ? "bg-accent text-white shadow-[0_0_15px_rgba(255,26,26,0.4)] hover:shadow-[0_0_20px_rgba(255,26,26,0.6)]"
-                : "text-white/60 hover:text-white hover:bg-white/5"
-            }`}
-          >
-            Trending Now
-          </Link>
+        <div className="w-full sm:w-auto mt-4 sm:mt-0">
+          <form action="/browse" className="relative group w-full sm:w-72 md:w-80 lg:w-96">
+            <input type="hidden" name="type" value={type} />
+            <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-white/40 transition-colors group-focus-within:text-accent">
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+              </svg>
+            </span>
+            <input
+              name="q"
+              defaultValue={q}
+              placeholder={type === "both" ? "Search..." : `Search ${type}...`}
+              className="w-full rounded-2xl border border-white/10 bg-white/5 py-3 pl-11 pr-5 text-sm text-white outline-none transition-all duration-300 placeholder:text-white/40 focus:border-accent/40 focus:bg-white/10 focus:ring-2 focus:ring-accent/20"
+            />
+          </form>
         </div>
       </div>
 
-      {type === "anime" && animeDeduped && (
-        <ul className="grid grid-cols-2 gap-4 sm:gap-5 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-5">
+      {(type === "anime" || type === "both") && animeDeduped && (
+        <div className="mb-12">
+          {type === "both" && <h2 className="mb-6 font-display text-2xl font-bold text-white">Trending Anime</h2>}
+          <ul className="grid grid-cols-2 gap-4 sm:gap-5 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-5">
           {animeDeduped.map((a) => {
             const src = a.image?.trim() ?? "";
             const name = a.title;
@@ -169,11 +164,14 @@ async function BrowseResults({ sp }: { sp: Awaited<SearchParams> }) {
               </li>
             );
           })}
-        </ul>
+          </ul>
+        </div>
       )}
 
-      {type === "manga" && mangaDeduped && (
-        <ul className="grid grid-cols-2 gap-4 sm:gap-5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+      {(type === "manga" || type === "both") && mangaDeduped && (
+        <div>
+          {type === "both" && <h2 className="mb-6 font-display text-2xl font-bold text-white">Trending Manga</h2>}
+          <ul className="grid grid-cols-2 gap-4 sm:gap-5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
           {mangaDeduped.map((m) => {
             const src = pickAnimeImage(m.images);
             const name = m.title_english || m.title;
@@ -204,7 +202,8 @@ async function BrowseResults({ sp }: { sp: Awaited<SearchParams> }) {
               </li>
             );
           })}
-        </ul>
+          </ul>
+        </div>
       )}
     </div>
   );

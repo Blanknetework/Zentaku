@@ -2,11 +2,7 @@
 
 import { useState } from "react";
 
-const demoComments = [
-  { user: "Yuki", text: "Animation this week was insane. That fight scene!", ago: "2h" },
-  { user: "Ren", text: "OST when the moon hits hits different.", ago: "5h" },
-  { user: "Mika", text: "Can't wait for next episode. Zentaku UI is clean too.", ago: "1d" },
-];
+
 
 export function CommentsSection() {
   const [draft, setDraft] = useState("");
@@ -32,20 +28,9 @@ export function CommentsSection() {
         </button>
       </div>
 
-      <ul className="space-y-4 pt-2">
-        {demoComments.map((c) => (
-          <li
-            key={c.user + c.ago}
-            className="rounded-xl border border-white/[0.06] bg-black/30 px-4 py-3"
-          >
-            <div className="flex items-center justify-between gap-2">
-              <span className="text-sm font-semibold text-accent">{c.user}</span>
-              <span className="text-xs text-muted">{c.ago} ago</span>
-            </div>
-            <p className="mt-2 text-sm leading-relaxed text-muted">{c.text}</p>
-          </li>
-        ))}
-      </ul>
+      <div className="pt-2">
+        <p className="text-sm text-white/50 italic">No comments yet. Be the first to share your thoughts!</p>
+      </div>
     </section>
   );
 }

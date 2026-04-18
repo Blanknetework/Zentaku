@@ -51,16 +51,16 @@ async function HomeData() {
   const mangaRowU = dedupeByMalId(mangaRow);
   const recentAnimeU = dedupeById(recentAnime);
 
-  const heroFeatured = topAiringU[0] ?? recentAnimeU[0] ?? null;
+  const heroFeaturedList = (topAiringU.length ? topAiringU : recentAnimeU).slice(0, 5);
   const featuredCarousel = recentAnimeU.length ? recentAnimeU : topAiringU;
 
   return (
     <>
-      <div className="mx-auto max-w-[1400px] px-4 pb-16 pt-4 lg:px-8 lg:pt-6">
+      <div className="mx-auto w-full max-w-[1400px] overflow-hidden px-4 pb-16 pt-4 lg:overflow-visible lg:px-8 lg:pt-6">
         <div className="flex flex-col gap-8 lg:flex-row lg:items-start">
           {/* Main Left Column */}
-          <div className="min-w-0 flex-1 flex flex-col gap-12">
-            <Hero featured={heroFeatured} />
+          <div className="min-w-0 flex-1 flex flex-col gap-12 max-w-full">
+            <Hero featuredList={heroFeaturedList} />
             <FeaturedCarousel items={featuredCarousel} />
             <MangaUpdatesRow items={mangaRowU} />
           </div>
@@ -79,10 +79,10 @@ export default function Home() {
   return (
     <Suspense
       fallback={
-        <div className="mx-auto max-w-[1400px] px-4 pb-16 pt-4 lg:px-8 lg:pt-6">
+        <div className="mx-auto w-full max-w-[1400px] overflow-hidden px-4 pb-16 pt-4 lg:overflow-visible lg:px-8 lg:pt-6">
           <div className="flex flex-col gap-8 lg:flex-row lg:items-start">
             {/* Main Left Column Skeleton */}
-            <div className="min-w-0 flex-1 flex flex-col gap-12">
+            <div className="min-w-0 flex-1 flex flex-col gap-12 max-w-full">
               <HeroSkeleton />
               <CardRowSkeleton />
               <MangaCardSkeleton />

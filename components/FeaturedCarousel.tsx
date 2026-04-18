@@ -24,8 +24,8 @@ export function FeaturedCarousel({ items }: Props) {
 
   return (
     <section className="space-y-4 w-full relative">
-      <div className="flex items-center justify-between px-1">
-        <h2 className="text-lg font-semibold text-muted md:text-xl">Featured Series</h2>
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-display tracking-wide font-semibold text-muted md:text-xl">Featured Series</h2>
         <div className="hidden gap-3 sm:flex">
           <button
             type="button"
@@ -48,7 +48,7 @@ export function FeaturedCarousel({ items }: Props) {
 
       <div
         ref={scrollRef}
-        className="scrollbar-hide flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 pl-1 pr-4"
+        className="scrollbar-hide flex snap-x snap-mandatory gap-4 overflow-x-auto pb-6 pt-2 -mx-4 px-4 lg:-mx-0 lg:px-0"
       >
         {items.map((anime) => {
           const src = anime.image?.trim() ?? "";

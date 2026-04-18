@@ -18,6 +18,7 @@ function NavbarInner() {
   const searchParams = useSearchParams();
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState("");
+  const [searchType, setSearchType] = useState("anime");
 
   return (
     <header className="sticky top-0 z-50 border-b border-white/[0.04]">
@@ -62,20 +63,29 @@ function NavbarInner() {
 
         <form
           action="/browse"
-          className="ml-auto hidden min-w-0 flex-1 max-w-sm items-center gap-2 md:flex"
+          className="ml-auto hidden min-w-0 flex-1 max-w-md items-center gap-2 md:flex"
         >
-          <input type="hidden" name="type" value="anime" />
-          <div className="relative w-full group">
-            <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-white/40 transition-colors group-focus-within:text-accent">
-              <SearchIcon className="h-4 w-4" />
-            </span>
+          <div className="relative flex w-full items-center rounded-full border border-white/10 bg-white/5 transition-all duration-300 focus-within:border-accent/40 focus-within:bg-black/60 focus-within:ring-4 focus-within:ring-accent/10 focus-within:shadow-[0_0_20px_rgba(255,26,26,0.15)] group">
+            <select
+              name="type"
+              value={searchType}
+              onChange={(e) => setSearchType(e.target.value)}
+              className="appearance-none bg-transparent pl-4 pr-2 py-2.5 text-sm font-semibold text-white/70 outline-none hover:text-white transition-colors cursor-pointer border-none focus:ring-0"
+            >
+              <option value="anime" className="bg-black text-white">Anime</option>
+              <option value="manga" className="bg-black text-white">Manga</option>
+            </select>
+            <div className="h-4 w-px bg-white/20 mx-1 shrink-0" />
             <input
               name="q"
               value={q}
               onChange={(e) => setQ(e.target.value)}
-              placeholder="Search anime..."
-              className="w-full rounded-full border border-white/10 bg-white/5 py-2.5 pl-11 pr-5 text-sm text-white outline-none transition-all duration-300 placeholder:text-white/40 focus:border-accent/40 focus:bg-black/60 focus:ring-4 focus:ring-accent/10 focus:shadow-[0_0_20px_rgba(255,26,26,0.15)]"
+              placeholder={`Search ${searchType}...`}
+              className="w-full bg-transparent py-2.5 pl-2 pr-5 text-sm text-white outline-none placeholder:text-white/40"
             />
+            <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-white/40 group-focus-within:text-accent">
+              <SearchIcon className="h-4 w-4" />
+            </span>
           </div>
         </form>
 
@@ -107,15 +117,23 @@ function NavbarInner() {
       {open && (
         <div className="absolute top-full left-0 right-0 border-b border-white/10 bg-black/95 px-4 py-6 backdrop-blur-xl md:hidden shadow-2xl animate-fade-up">
           <form action="/browse" className="mb-6 flex gap-2">
-            <input type="hidden" name="type" value="anime" />
+            <select
+              name="type"
+              value={searchType}
+              onChange={(e) => setSearchType(e.target.value)}
+              className="rounded-xl border border-white/10 bg-white/5 px-3 py-3 text-sm text-white outline-none appearance-none"
+            >
+              <option value="anime">Anime</option>
+              <option value="manga">Manga</option>
+            </select>
             <div className="relative w-full">
               <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-white/40">
                 <SearchIcon className="h-4 w-4" />
               </span>
               <input
                 name="q"
-                placeholder="Search anime..."
-                className="w-full rounded-full border border-white/10 bg-white/5 py-3 pl-11 pr-4 text-sm text-white outline-none transition-all focus:border-accent/40 focus:bg-white/10"
+                placeholder={`Search ${searchType}...`}
+                className="w-full rounded-xl border border-white/10 bg-white/5 py-3 pl-11 pr-4 text-sm text-white outline-none transition-all focus:border-accent/40 focus:bg-white/10"
               />
             </div>
           </form>
