@@ -1,7 +1,5 @@
 import { ANIME } from "@consumet/extensions";
 
-const animekai = new ANIME.AnimeKai();
-
 export class AnimeKaiError extends Error {
   status: number;
   constructor(message: string, status: number) {
@@ -54,6 +52,7 @@ export type AnimeKaiWatchSource = {
   url: string;
   quality: string;
   isM3U8: boolean;
+  isIframe?: boolean;
 };
 
 export type AnimeKaiWatchResult = {
@@ -62,49 +61,67 @@ export type AnimeKaiWatchResult = {
   download?: string;
 };
 
-function parseAnimeItem(r: any): AnimeKaiListItem {
-  return {
-    id: r.id,
-    title: typeof r.title === "string" ? r.title : r.title?.english || r.title?.romaji || r.title?.native || "Unknown",
-    url: r.url,
-    image: r.image,
-    releaseDate: r.releaseDate,
-    subOrDub: r.sub || r.dub ? "sub" : undefined
-  };
+const ANIPUB_API = "https://anipub.xyz";
+
+function fixImageUrl(url?: string) {
+  if (!url) return "";
+  if (url.startsWith("http")) return url;
+  return `${ANIPUB_API}/${url}`;
 }
 
 export async function animeKaiSearch(query: string, page = 1): Promise<AnimeKaiSearchPage> {
   const q = query.trim() || "a";
-  const searchResult = await animekai.search(q, page);
-  return {
-    currentPage: searchResult.currentPage || page,
-    hasNextPage: searchResult.hasNextPage || false,
-    results: (searchResult.results || []).map(parseAnimeItem)
-  };
+  try {
+    const res = await fetch(`${ANIPUB_API}/api/searchall/${encodeURIComponent(q)}?page=${page}`);
+    if (!res.ok) return { currentPage: page, hasNextPage: false, results: [] };
+    const data = await res.json();
+    const results = (data.AniData || []).map((a: any) => ({
+      id: a.finder,
+      title: a.Name,
+      url: "",
+      image: fixImageUrl(a.ImagePath || a.Image),
+      subOrDub: "sub"
+    }));
+    return {
+      currentPage: data.currentPage || page,
+      hasNextPage: results.length > 0,
+      results
+    };
+  } catch (e) {
+    return { currentPage: page, hasNextPage: false, results: [] };
+  }
 }
 
 export async function animeKaiInfo(id: string): Promise<AnimeKaiInfo> {
-  const info = await animekai.fetchAnimeInfo(id);
+  const res = await fetch(`${ANIPUB_API}/api/info/${id}`);
+  if (!res.ok) {
+    throw new AnimeKaiError("Anime not found", res.status);
+  }
+  const data = await res.json();
+  
+  const epCount = data.epCount || 0;
+  const episodes: AnimeKaiEpisode[] = [];
+  for (let i = 1; i <= epCount; i++) {
+    episodes.push({
+      id: `${data._id}-ep-${i}`,
+      number: i,
+      title: `Episode ${i}`,
+      url: ""
+    });
+  }
+
   return {
-    id: info.id,
-    alID: (info as any).alID,
-    malID: (info as any).malID,
-    title: info.title.toString(),
-    url: info.url || "",
-    image: info.image || "",
-    description: info.description || "",
-    genres: info.genres || [],
-    subOrDub: info.subOrDub || "sub",
-    type: info.type || "TV",
-    status: info.status || "Completed",
-    otherName: info.japaneseTitle || undefined,
-    totalEpisodes: info.episodes?.length || 0,
-    episodes: (info.episodes || []).map((ep: any) => ({
-      id: ep.id,
-      number: ep.number,
-      title: ep.title || `Episode ${ep.number}`,
-      url: ep.url || ""
-    }))
+    id: data.finder || id,
+    title: data.Name,
+    url: "",
+    image: fixImageUrl(data.ImagePath),
+    description: data.DescripTion || "",
+    genres: data.Genres || [],
+    subOrDub: "sub",
+    type: "TV",
+    status: data.Status || "Ongoing",
+    totalEpisodes: epCount,
+    episodes
   };
 }
 
@@ -113,49 +130,75 @@ export async function animeKaiWatch(
   server = "vidstreaming",
   category = "sub",
 ): Promise<AnimeKaiWatchResult> {
-  const src = await animekai.fetchEpisodeSources(episodeId);
+  const parts = episodeId.split("-ep-");
+  const _id = parts[0];
+  const epNum = parseInt(parts[1] || "1");
+
+  const res = await fetch(`${ANIPUB_API}/v1/api/details/${_id}`);
+  if (!res.ok) {
+    throw new AnimeKaiError("Failed to fetch streaming details", res.status);
+  }
+  const data = await res.json();
+
+  let iframeSrc = "";
+  if (data.local) {
+     if (epNum === 1) {
+       iframeSrc = data.local.link;
+     } else if (data.local.ep && data.local.ep[epNum - 2]) {
+       iframeSrc = data.local.ep[epNum - 2].link;
+     }
+  }
+  
+  if (iframeSrc.startsWith("src=")) {
+    iframeSrc = iframeSrc.replace("src=", "");
+  }
+
+  if (!iframeSrc) {
+    throw new AnimeKaiError("Episode link not found", 404);
+  }
+
+  // Adjust audio category dynamically if the API allows it natively via path segments
+  if (iframeSrc.endsWith("/sub") || iframeSrc.endsWith("/dub")) {
+      iframeSrc = iframeSrc.replace(/\/(sub|dub)$/, `/${category}`);
+  }
+
   return {
-    headers: src.headers,
-    sources: (src.sources || []).map((s: any) => ({
-      url: s.url,
-      quality: s.quality,
-      isM3U8: s.isM3U8
-    })),
-    download: Array.isArray(src.download) ? src.download[0]?.url : (typeof src.download === "string" ? src.download : undefined)
+    sources: [{
+      url: iframeSrc,
+      quality: "default",
+      isM3U8: false,
+      isIframe: true
+    }]
   };
 }
 
 export async function animeKaiAdvancedSearch(
   params: Record<string, string | number | undefined>,
 ): Promise<AnimeKaiSearchPage> {
-  // Mapping advanced search to basic search since AnimeKai has limited sorting options out-the-box
   const query = String(params.keyword || params.q || "a");
   return animeKaiSearch(query, Number(params.page || 1));
 }
 
 export async function animeKaiPopular(page = 1, limitSlice = 24): Promise<AnimeKaiListItem[]> {
   try {
-    const data = await animekai.search("a", page);
-    return (data.results || []).slice(0, limitSlice).map(parseAnimeItem);
+    const res = await fetch(`${ANIPUB_API}/api/findbyrating?page=${page}`);
+    if (!res.ok) return [];
+    const data = await res.json();
+    return (data.AniData || []).slice(0, limitSlice).map((a: any) => ({
+      id: a.finder,
+      title: a.Name,
+      url: "",
+      image: fixImageUrl(a.ImagePath),
+    }));
   } catch (e) {
     return [];
   }
 }
 
 export async function animeKaiRecent(page = 1, limitSlice = 24): Promise<AnimeKaiListItem[]> {
-  try {
-    const data = await animekai.fetchRecentlyAdded(page);
-    return (data.results || []).slice(0, limitSlice).map(parseAnimeItem);
-  } catch(e) {
-    return [];
-  }
+  return animeKaiPopular(page, limitSlice);
 }
 
 export async function animeKaiTopAiring(page = 1, limitSlice = 24): Promise<AnimeKaiListItem[]> {
-  try {
-    const data = await animekai.fetchRecentlyUpdated(page);
-    return (data.results || []).slice(0, limitSlice).map(parseAnimeItem);
-  } catch (e) {
-    return [];
-  }
+  return animeKaiPopular(page, limitSlice);
 }

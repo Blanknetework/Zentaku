@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 
 type WatchJson = {
   headers?: Record<string, string>;
-  sources: { url: string; quality: string; isM3U8: boolean }[];
+  sources: { url: string; quality: string; isM3U8: boolean; isIframe?: boolean }[];
 };
 
 function pickSource(data: WatchJson) {
@@ -31,25 +31,30 @@ export function HlsVideoPlayer({
   const hlsRef = useRef<{ destroy: () => void } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [iframeUrl, setIframeUrl] = useState<string | null>(null);
 
   const [activeCategory, setActiveCategory] = useState(category);
 
   useEffect(() => {
     const video = videoRef.current;
-    if (!video || !episodeId) return;
+    if (!episodeId) return;
 
     let cancelled = false;
     setError(null);
     setLoading(true);
-    hlsRef.current?.destroy();
-    hlsRef.current = null;
-    video.removeAttribute("src");
-    video.load();
+    setIframeUrl(null);
+    if (video) {
+      hlsRef.current?.destroy();
+      hlsRef.current = null;
+      video.removeAttribute("src");
+      video.load();
+    }
 
     const run = async () => {
       try {
         const qs = new URLSearchParams({
           episodeId,
+          category: activeCategory,
         });
         const res = await fetch(`/api/animekai/watch?${qs}`);
         const body = (await res.json()) as WatchJson & { error?: string };
@@ -60,6 +65,14 @@ export function HlsVideoPlayer({
 
         const src = pickSource(body);
         if (!src?.url) throw new Error("No playable source returned");
+
+        if (src.isIframe) {
+          setIframeUrl(src.url);
+          setLoading(false);
+          return;
+        }
+
+        if (!video) return;
 
         if (src.isM3U8 && video.canPlayType("application/vnd.apple.mpegurl")) {
           video.src = src.url;
@@ -126,9 +139,16 @@ export function HlsVideoPlayer({
             {error}
           </div>
         )}
+        {iframeUrl && !error ? (
+          <iframe
+            src={iframeUrl}
+            className="absolute inset-0 h-full w-full border-none z-0"
+            allowFullScreen
+          />
+        ) : null}
         <video
           ref={videoRef}
-          className="h-full w-full"
+          className={`h-full w-full ${iframeUrl ? "hidden" : ""}`}
           controls
           playsInline
           poster={poster}
