@@ -16,8 +16,12 @@ export class JikanError extends Error {
   }
 }
 
-async function jikanJson<T>(path: string): Promise<T> {
+async function jikanJson<T>(path: string, retries = 3, delay = 1000): Promise<T> {
   const res = await fetch(`${BASE}${path}`, defaultInit);
+  if (res.status === 429 && retries > 0) {
+    await new Promise((resolve) => setTimeout(resolve, delay));
+    return jikanJson<T>(path, retries - 1, delay * 2);
+  }
   if (res.status === 429) {
     throw new JikanError("Rate limited. Please try again shortly.", 429);
   }

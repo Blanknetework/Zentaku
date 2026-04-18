@@ -14,8 +14,12 @@ export class MangaDexError extends Error {
   }
 }
 
-async function mdJson<T>(path: string): Promise<T> {
+async function mdJson<T>(path: string, retries = 3, delay = 1000): Promise<T> {
   const res = await fetch(`${BASE}${path}`, init);
+  if (res.status === 429 && retries > 0) {
+    await new Promise((resolve) => setTimeout(resolve, delay));
+    return mdJson<T>(path, retries - 1, delay * 2);
+  }
   if (!res.ok) {
     throw new MangaDexError(`MangaDex request failed (${res.status})`, res.status);
   }
